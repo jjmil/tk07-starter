@@ -6,7 +6,6 @@ backing link store (injected via `LinkStoreDI`).
 """
 
 from models import LinkModel
-from store import LinkStoreDI
 
 
 class LinkService:
@@ -17,14 +16,14 @@ class LinkService:
             `LinkStoreDI` interface used to persist `Link` instances.
     """
 
-    def __init__(self, link_store: LinkStoreDI):
+    def __init__(self):  # , link_store: LinkStoreDI):
         """Constructor.
 
         Args:
             link_store: A concrete implementation of `LinkStoreDI` used to
                 store and retrieve `Link` objects.
         """
-        self._link_store = link_store
+        # self._link_store = link_store
 
     def create(self, slug: str, link: LinkModel) -> LinkModel:
         """Create and persist a new shortened link.
@@ -40,7 +39,7 @@ class LinkService:
             ValueError: If the provided `slug` is already taken.
         """
         if self.get(slug) is None:
-            self._link_store.put(slug, link)
+            # self._link_store.put(slug, link)
             return link
         else:
             raise ValueError(f"Slug `{slug}` already taken.")
@@ -54,16 +53,16 @@ class LinkService:
         Returns:
             The stored :class:`Link` if found, otherwise ``None``.
         """
-        link = self._link_store.get(slug)
-        if link:
-            link.hits += 1
-            self._link_store.put(slug, link)
-        return link
+        # link = self._link_store.get(slug)
+        # if link:
+        #     link.hits += 1
+        #     self._link_store.put(slug, link)
+        # return link
 
-    def list_links(self) -> list[LinkModel]:
+    def list_links(self):  # -> list[LinkModel]:
         """Return a list of all stored links.
 
         Returns:
             A list of :class:`Link` instances currently stored.
         """
-        return list(self._link_store.list().values())
+        # return list(self._link_store.list().values())
