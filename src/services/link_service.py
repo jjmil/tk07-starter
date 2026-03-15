@@ -56,6 +56,7 @@ class LinkService:
         Returns:
             The stored :class:`Link` if found, otherwise ``None``.
         """
+        return self._session.get(LinkModel, slug)
         # link = self._link_store.get(slug)
         # if link:
         #     link.hits += 1
