@@ -43,6 +43,10 @@ class LinkService:
         """
         if self.get(slug) is None:
             # self._link_store.put(slug, link)
+            self._session.add(link)
+            self._session.commit()
+
+            self._session.refresh(link)
             return link
         else:
             raise ValueError(f"Slug `{slug}` already taken.")
