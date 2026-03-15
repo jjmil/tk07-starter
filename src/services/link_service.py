@@ -5,8 +5,10 @@ logic for creating, retrieving, and listing shortened links using a
 backing link store (injected via `LinkStoreDI`).
 """
 
+from sqlmodel import col, select
+
+from db import SessionDI
 from models import LinkModel
-from store import LinkStoreDI
 
 
 class LinkService:
@@ -17,14 +19,14 @@ class LinkService:
             `LinkStoreDI` interface used to persist `Link` instances.
     """
 
-    def __init__(self, link_store: LinkStoreDI):
+    def __init__(self, session: SessionDI):
         """Constructor.
 
         Args:
             link_store: A concrete implementation of `LinkStoreDI` used to
                 store and retrieve `Link` objects.
         """
-        self._link_store = link_store
+        self._session = session
 
     def create(self, slug: str, link: LinkModel) -> LinkModel:
         """Create and persist a new shortened link.
@@ -40,7 +42,11 @@ class LinkService:
             ValueError: If the provided `slug` is already taken.
         """
         if self.get(slug) is None:
-            self._link_store.put(slug, link)
+            # self._link_store.put(slug, link)
+            self._session.add(link)
+            self._session.commit()
+
+            self._session.refresh(link)
             return link
         else:
             raise ValueError(f"Slug `{slug}` already taken.")
@@ -54,11 +60,12 @@ class LinkService:
         Returns:
             The stored :class:`Link` if found, otherwise ``None``.
         """
-        link = self._link_store.get(slug)
-        if link:
-            link.hits += 1
-            self._link_store.put(slug, link)
-        return link
+        return self._session.get(LinkModel, slug)
+        # link = self._link_store.get(slug)
+        # if link:
+        #     link.hits += 1
+        #     self._link_store.put(slug, link)
+        # return link
 
     def list_links(self) -> list[LinkModel]:
         """Return a list of all stored links.
@@ -66,4 +73,6 @@ class LinkService:
         Returns:
             A list of :class:`Link` instances currently stored.
         """
-        return list(self._link_store.list().values())
+        statement = select(LinkModel).order_by(col(LinkModel.hits))
+        return list(self._session.exec(statement).all())
+        # return list(self._link_store.list().values())
