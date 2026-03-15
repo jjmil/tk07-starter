@@ -5,6 +5,9 @@ logic for creating, retrieving, and listing shortened links using a
 backing link store (injected via `LinkStoreDI`).
 """
 
+from sqlmodel import col, select
+
+from db import SessionDI
 from models import LinkModel
 
 
@@ -16,14 +19,14 @@ class LinkService:
             `LinkStoreDI` interface used to persist `Link` instances.
     """
 
-    def __init__(self):  # , link_store: LinkStoreDI):
+    def __init__(self, session: SessionDI):
         """Constructor.
 
         Args:
             link_store: A concrete implementation of `LinkStoreDI` used to
                 store and retrieve `Link` objects.
         """
-        # self._link_store = link_store
+        self._session = session
 
     def create(self, slug: str, link: LinkModel) -> LinkModel:
         """Create and persist a new shortened link.
@@ -59,10 +62,12 @@ class LinkService:
         #     self._link_store.put(slug, link)
         # return link
 
-    def list_links(self):  # -> list[LinkModel]:
+    def list_links(self) -> list[LinkModel]:
         """Return a list of all stored links.
 
         Returns:
             A list of :class:`Link` instances currently stored.
         """
+        statement = select(LinkModel).order_by(col(LinkModel.hits))
+        return list(self._session.exec(statement).all())
         # return list(self._link_store.list().values())
