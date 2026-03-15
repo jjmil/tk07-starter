@@ -2,14 +2,14 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from db import SessionDI
 from models import LinkModel
 from services import LinkService
-from store import LinkStore
 
 
 @pytest.fixture()
 def link_svc() -> tuple[LinkService, MagicMock]:
-    mock_store = MagicMock(spec=LinkStore)
+    mock_store = MagicMock(spec=SessionDI)
     link_svc = LinkService(mock_store)
     return (link_svc, mock_store)
 
